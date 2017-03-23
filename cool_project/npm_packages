@@ -1,0 +1,7 @@
+# Browserify is required.
+# You can install it globally and delete from here.
+npm 'browserify', require: false, development: true
+npm 'angular'
+npm 'angular-resource'
+npm 'angular-route'
+# Add some npm packages

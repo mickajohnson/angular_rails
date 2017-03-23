@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Angular + Rails</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="text-center">Step by Step Ruby + Angular Guide</h1>
+      <p>There are a lot of great resources online devoted to helping you through the Rails + Angular process. However, many guide you through fairly robust projects. This guide is for those who already have a good understanding of both Rails and Angular and just need a quick guide for setting up Angular within Rails</p>
+      <hr>
+      <h3>Setting Up Rails/Downloading Angular</h3>
+      <ol>
+        <li>On your command line, start a new rails project:
+          <code>rails new &lt;project_name&gt;</code>
+        </li>
+        <li>To your Gemfile add
+          <code>gem 'npm-rails'</code> (I also highly reccomend <code>gem 'angular_rails_csrf'</code> if you plan on sending any form data to the back end)
+          Then on your command line <code>bundle install</code>
+        </li>
+        <li>
+          Then run the command
+          <code>rails g npm_rails:initialize</code>
+        </li>
+        <li>
+          You should see a <i>npm_packages</i> file in your project folder. Open it and add below <code>npm 'angular'</code>. You may also want to go ahead and add other dependencies you think you'll need. I recommend <code>npm 'angular-resource'
+          npm 'angular-route' 'npm angular-cookies'</code>.
+         </li>
+         <li>
+           On your command line, run <code>rake npm:install</code>. This may take a little while. It will download the specified files and add them to a <i>node_modules</i> folder in your project (a folder you probably want to add to your <i>.gitignore</i>) folder
+         </li>
+      </ol>
+      <h3>Setting Up Angular</h3>
+      <ol>
+        <li>
+          On Your command line: <code>rails g controller Pages index</code>
+        </li>
+        <li>
+          In <i>../config/routes.rb</i> add <code>root 'pages#index'</code>
+        </li>
+        <li>
+          To <i>../app/assets/javascripts/application.js</i> add
+          <code>//= require npm-dependencies</code> and <code>//= require main</code> (make sure to add these just before <code>//= require_tree .</code>)
+          and remove <code>//= require turbolinks</code> (I'll be honest, I'm not positive how neccessary this is, but I was told turbolinks and angular could interact in weird ways.)
+        </li>
+        <li>
+          To <i>../app/views/layouts/application.html.erb</i> add <code>ng-app="YourAppName"</code> and delete mentions of turbolinks. As an example, here's what mine looked like:<br> <code>&lt;!DOCTYPE html&gt;<br>
+          &lt;html ng-app="myApp"&gt;<br>
+          &lt;head&gt;<br>
+            &lt;title&gt;Awesome Website&lt;/title&gt;<br>
+            &lt;%= stylesheet_link_tag    'application', media: 'all' %&gt;<br>
+            &lt;%= javascript_include_tag 'application' %&gt;<br>
+            &lt;%= csrf_meta_tags %&gt;<br>
+          &lt;/head&gt;<br>
+          &lt;body&gt;<br>
+          &lt;%= yield %&gt;<br>
+          &lt;/body&gt;<br>
+          &lt;/html&gt;</code>
+        </li>
+        <li>
+          To <i>../app/views/pages/index.html.erb</i> add <code>&lt;div ng-view="">&lt;/div&gt;</code>
+        </li>
+        <li>
+          In your <i>../public</i> folder add a <i>templates</i> folder. This is where your html files will go (and where you'll tell angular to look for them). If this is your first time setting this up, go ahead and add an <i>home.html</i> file to this folder so we can test that things are working properly.
+        </li>
+        <li>
+          I suggest adding an <i>angular</i> folder to your <i>../apps/assets/javascripts</i> folder where you can store all of your angular files and folders. If you wish to modularize, you can go ahead and add a <i>controllers</i> folder and a <i>factories</i> folder (or however you want to do it) to this folder.
+        </li>
+        <li>
+          Create a <i>main.js</i> file in your <i>../apps/assets/javascripts</i> folder. You can call this whatever you like, just make sure it matches with what you required in your <i>application.js</i> file.
+        </li>
+        <li>
+          In this file, set up your angular app and if you want, set up your routes. For example, this is my file: <br>
+          <code>var app = angular.module("myApp", ["ngRoute"]);<br>
+          app.config(function ($routeProvider) {<br>
+            $routeProvider<br>
+            .when('/', {<br>
+              templateUrl: "../templates/home.html",
+              controller: "homeController"<br>
+            })<br>
+            .otherwise({<br>
+              redirectTo: '/'<br>
+            })<br>
+          })</code>
+        </li>
+      </ol>
+      <h3>Testing Things out (optional)</h3>
+      <p>If this is your first time, lets set up a controller and edit that <i>home.html</i> to make sure things are working properly.</p>
+      <ol>
+        <li>
+          To your newly created <i>angular/controllers</i> folder add a controller (I called mine <i>homeController.js</i>). Mine looks like this:<br><code>app.controller('homeController', ['$scope', function($scope){<br>
+          $scope.secret = 'World!'<br>
+          }])</code>
+        </li>
+        <li>
+          To your <i>../public/templates/home.html</i> file add <code>&lt;h1&gt;Hello {{secret}}&lt;/h1&gt;</code>. run your server (<code>rails s</code>) And hopefully you should see "Hello World!".
+        </li>
+      </ol>
+      <h3>And That's It!</h3>
+      <p>I recommend looking into Angular-Resource for CRUD and RESTful interactions with the database. Also, look into rendering json in your rails controllers.</p>
+      <h3>Links and More Info</h3>
+      <ul>
+        <li><a href="http://www.rubydoc.info/gems/npm-rails/0.2.0">More info on npm-rails</a></li>
+        <li><a href="https://docs.angularjs.org/api">Angular docs</a></li>
+        <li><a href="https://daveceddia.com/angular/get-data-from-your-rails-app-using-angular-resource/">A helpful guide to Angular-resource</a></li>
+        <li><a href="https://github.com/jsanders/angular_rails_csrf">Angular-Rails CSRF Token</a></li>
+        <li><a href="https://launchschool.com/blog/integrating-rails-and-bootstrap-part-1">Easy guide for adding Bootstrap</a></li>
+        <li><a href="http://blog.honeybadger.io/beginners-guide-to-angular-js-rails/">This Post</a> Informed a good chunk of my Ruby + Angular knowledge.</li>
+      </ul>
+    </div>
+  </body>
+</html>
